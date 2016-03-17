@@ -1,15 +1,18 @@
 close all; clear all; clc;
+
+addpath('.\Data');
 %%  Set the parameters
 [gmmConf, dataConf] = ParaSet;
 
 %% load high and low resolution image data
-% TD_path      =   '.\TrainingData';
-% [hiresImgs, loresImgs]= prepareImg( load_images(glob( TD_path, '*.bmp')), dataConf );
-prepareImg=load('prepareImgs.mat');
-hiresImgs=prepareImg.hiresImgs;
-loresImgs=prepareImg.loresImgs;
-im_num    =   size (hiresImgs);
+TD_path      =   '.\Data\TrainingImg';
+[hiresImgs, loresImgs]= prepareImg( load_images(glob( TD_path, '*.bmp')), dataConf );
 
+% prepareImg=load('prepareImgs.mat');
+% hiresImgs=prepareImg.hiresImgs;
+% loresImgs=prepareImg.loresImgs;
+
+im_num    =   numel (hiresImgs);
 hX     =  [];    lX     =  [];   
 
 %% get group patches for high resolution images
@@ -17,24 +20,29 @@ for  i  =  1: im_num
     imhires = hiresImgs{i};   
     imlores =loresImgs{i};
     [hPx, lPx] =  Get_PG( imhires, imlores, gmmConf);    
-    sprintf('Get PG for the %d / %d images...\n', i, im_num);
+    fprintf('Get PG for the %d / %d images...\n', i, im_num);
     clear imhires imlores;    
     hX   = [hX hPx];
     lX   = [lX lPx];
     clear hPx  lPx  ;
 end
 
-% num_lX=size(lX,2);   
+% do PCA with lores data IX
 [lX, lV_pca] = dataPCA(lX);
 dataConf. lV_pca=lV_pca;
+% save PG datas
+name_mat = sprintf('Get_PG.mat');     save(name_mat,'hX','lX','lV_pca');
 
-name_mat = sprintf('Get_PG.mat');
-save(name_mat,'hX','lX','lV_pca');
+% % load Get_PG.mat
+% Get_PG_mat=load('Get_PG.mat');
+% hX=Get_PG_mat.hX;
+% lX=Get_PG_mat.lX;
+% lV_pca = Get_PG_mat.lV_pca;
 
 %% PG-GMM Training for hires Imgs
-sprintf('Start PG training for hires Imgs...\n');
+fprintf('Start PG training for hires Imgs...\n');
 [model_h, llh_h, cls_idh] = emgm(hX, gmmConf);     %cls_idx :  label vector for all X
-sprintf('Trained PG for hires Imgs with %d components in total...\n', max(cls_idh(:)));
+fprintf('Trained PG for hires Imgs with %d components in total...\n', max(cls_idh(:)));
 
 [s_idh, seg_h]    =  Proc_cls_idx( cls_idh );        % seg(i):    第（i-1）个 高斯成分中含有 x 数据的个数，
                                                                    %s_idx(1 : seg(2)）: 属于第 1 个高斯成分的 所有x 数据的 id
@@ -67,9 +75,9 @@ end
 clear P S ;
 
 %% PG-GMM Training for lores Imgs
-sprintf('Start PG training for lores Imgs...\n');
+fprintf('Start PG training for lores Imgs...\n');
 [model_l, llh_l, cls_idl] = emgm(lX, gmmConf);     %cls_idx :  label vector for all X
-sprintf('Trained PG for lores Imgs with %d components in total...\n', max(cls_idl(:)));
+fprintf('Trained PG for lores Imgs with %d components in total...\n', max(cls_idl(:)));
 
 [s_idl, seg_l]    =  Proc_cls_idx( cls_idl );        % seg(i):    第（i-1）个 高斯成分中含有 x 数据的个数，
                                                                    %s_idx(1 : seg(2)）: 属于第 1 个高斯成分的 所有x 数据的 id
