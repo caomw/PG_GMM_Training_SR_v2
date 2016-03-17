@@ -1,0 +1,7 @@
+*.bmp
+*.tif
+*.png
+*.mat
+TrainingData/
+TrainingData1/
+*.m~
