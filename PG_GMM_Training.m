@@ -1,18 +1,15 @@
 close all; clear all; clc;
-
-addpath('.\Data');
 %%  Set the parameters
 [gmmConf, dataConf] = ParaSet;
 
 %% load high and low resolution image data
-TD_path      =   '.\Data\TrainingImg';
-[hiresImgs, loresImgs]= prepareImg( load_images(glob( TD_path, '*.bmp')), dataConf );
-
-% prepareImg=load('prepareImgs.mat');
-% hiresImgs=prepareImg.hiresImgs;
-% loresImgs=prepareImg.loresImgs;
-
+% TD_path      =   '.\TrainingData';
+% [hiresImgs, loresImgs]= prepareImg( load_images(glob( TD_path, '*.bmp')), dataConf );
+prepareImg=load('prepareImgs.mat');
+hiresImgs=prepareImg.hiresImgs;
+loresImgs=prepareImg.loresImgs;
 im_num    =   numel (hiresImgs);
+
 hX     =  [];    lX     =  [];   
 
 %% get group patches for high resolution images
@@ -27,17 +24,12 @@ for  i  =  1: im_num
     clear hPx  lPx  ;
 end
 
-% do PCA with lores data IX
+% num_lX=size(lX,2);   
 [lX, lV_pca] = dataPCA(lX);
 dataConf. lV_pca=lV_pca;
-% save PG datas
-name_mat = sprintf('Get_PG.mat');     save(name_mat,'hX','lX','lV_pca');
 
-% % load Get_PG.mat
-% Get_PG_mat=load('Get_PG.mat');
-% hX=Get_PG_mat.hX;
-% lX=Get_PG_mat.lX;
-% lV_pca = Get_PG_mat.lV_pca;
+name_mat = sprintf('Get_PG.mat');
+save(name_mat,'hX','lX','lV_pca');
 
 %% PG-GMM Training for hires Imgs
 fprintf('Start PG training for hires Imgs...\n');
@@ -116,8 +108,11 @@ clear P S ;
 % name_l = sprintf('Lores_PG_GMM_%dx%d_win%d_nlsp%d_delta_l%2.3f_cls%d.mat',ps,ps,win,nlsp,delta,cls_num);
 % save(name_l,'model','nlsp','GMM_DL','GMM_SL','cls_num','delta(2)','ps','win','lV_pca');
 
-name_h = sprintf('Hires_PG_GMM_%dx%d_win%2.3f_cls%d.mat',ps,ps,cls_num);
+name_h = sprintf('Hires_PG_GMM_%dx%d_win%d_cls%d.mat',ps,ps,cls_num);
 save(name_h,'model_h','GMM_DH','GMM_SH','gmmConf','dataConf');
 
-name_l = sprintf('Lores_PG_GMM_%dx%d_win%2.3f_cls%d.mat',ps,ps,cls_num);
+name_l = sprintf('Lores_PG_GMM_%dx%d_win%d_cls%d.mat',ps,ps,cls_num);
 save(name_l,'model_l','GMM_DL','GMM_SL','lV_pca','gmmConf','dataConf');
+
+name_hl = sprintf('Hires_Lores_PG_GMM_data.mat');
+save(name_hl,'cls_idh','cls_idl','llh_h','llh_l','s_idh','s_idl','seg_h','seg_l');
