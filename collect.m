@@ -1,19 +1,28 @@
-function [features, feature_sizes] = collect(conf, imgs, scale, filters)
+function [features] = collect(conf, imgs, scale, filters, verbose)
 
+if nargin < 5
+    verbose = 0;
+end
 
 num_of_imgs = numel(imgs);
 feature_cell = cell(num_of_imgs, 1); % contains images' features
-feature_sizes = zeros(num_of_imgs,1);
+num_of_features = 0;
 
 if verbose
     fprintf('Collecting features from %d image(s) ', num_of_imgs)
 end
+feature_size = [];
 
+h = [];
 for i = 1:num_of_imgs
+    h = progress(h, i / num_of_imgs, verbose);
     sz = size(imgs{i});
-     
+    if verbose
+        fprintf(' [%d x %d]', sz(1), sz(2));
+    end
+    
     F = extract(conf, imgs{i}, scale, filters);
-    feature_sizes(i)= size(F, 2);
+    num_of_features = num_of_features + size(F, 2);
     feature_cell{i} = F;
 
     assert(isempty(feature_size) || feature_size == size(F, 1), ...

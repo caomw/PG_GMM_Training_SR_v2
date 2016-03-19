@@ -1,12 +1,12 @@
-function [model,llh,label]= emgm(X, gmmConf)
+function [model,llh,label]= emgm( X, gmm_conf)
 % Perform EM algorithm for fitting the Gaussian mixture model.
 %   X: d x n data matrix
 %   init: k (1 x 1) or label (1 x n, 1<=label(i)<=k) or center (d x k)
 % Written by Michael Chen (sth4nth@gmail.com).
 %%
-
-init=gmmConf.cls_num;
-nlsp=gmmConf.nlsp;
+% X=gmm_conf.data;
+init=gmm_conf.cls_num;
+nlsp=gmm_conf.nlsp;
 
 %% initialization
 fprintf('EM for PG-GMM: running ... \n');
@@ -27,7 +27,8 @@ while ~converged && t < maxiter
     % output
     fprintf('Iteration %d of %d, logL: %.2f\n',t,maxiter,llh(t));
     % output
-    subplot(1,2,1);
+    figure(),
+%     subplot(1,2,1);
     plot(llh(1:t),'o-'); drawnow;
     [~,label(:)] = max(R,[],2);
     u = unique(label);   % non-empty components

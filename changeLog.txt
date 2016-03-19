@@ -1,1 +1,2 @@
-与v1版本比，对样本进行group时，不区分平滑区域，即 不判断 var(x_nl)<delta
+v2: 与v1版本比，对样本进行group时，不区分平滑区域，即 不判断 var(x_nl)<delta
+v3: 不进行group,且只对low res feature set 进行GMM训练，一共1024个成分
